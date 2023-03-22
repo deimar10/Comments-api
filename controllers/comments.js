@@ -1,5 +1,16 @@
 const db = require('../models/db');
 
+exports.getComments = async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM comments");
+
+        return res.status(200).send(result);
+    } catch (error) {
+        console.log(`Error trying to get comments: ${error}`);
+        return res.status(400).send();
+    }
+}
+
 exports.createComment = async (req, res) => {
     try {
 
