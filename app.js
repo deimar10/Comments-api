@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -9,6 +10,7 @@ app.use(cors());
 
 const router = require('./routes/comments');
 
+app.use(bodyParser.json());
 app.use("/comments", router);
 
 const port = process.env.PORT || 3002;
