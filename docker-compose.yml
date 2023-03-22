@@ -11,8 +11,8 @@ services:
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=qwerty
-      - MYSQL_DATABASE=comments
-      - MYSQL_USER=user
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=root
       - MYSQL_PASSWORD=qwerty
     ports:
       - 3306:3306
