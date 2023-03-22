@@ -34,3 +34,15 @@ exports.createComment = async (req, res) => {
     }
 }
 
+exports.deleteComment = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await db.query('DELETE FROM comments WHERE id = ?', [id]);
+
+        return res.status(204).send();
+    } catch (error) {
+        console.log(`Error trying to delete comment: ${error}`);
+        return res.status(400).send();
+    }
+}
+
