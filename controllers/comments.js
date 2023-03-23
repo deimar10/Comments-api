@@ -13,10 +13,7 @@ exports.getComments = async (req, res) => {
 
 exports.createComment = async (req, res) => {
     try {
-        let content = req.body.content;
-        let createdAt = req.body.createdAt;
-        let username = req.body.username;
-
+        const {content, createdAt, username} = req.body;
         const result = await db.query("INSERT INTO `comments`(`content`,`createdAt`, `username`) VALUES (?, ?, ?)",
             [content, createdAt, username]);
 
@@ -35,10 +32,7 @@ exports.createComment = async (req, res) => {
 
 exports.editComment = async (req, res) => {
     try {
-        let content = req.body.content;
-        let createdAt = req.body.createdAt;
-        let username = req.body.username;
-
+        const {content, createdAt, username} = req.body;
         const id = req.params.id;
         const result = await db.query("UPDATE comments SET content = ?, createdAt = ?, username = ? WHERE id = ?",
             [content, createdAt, username, id]);
