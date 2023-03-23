@@ -13,7 +13,6 @@ exports.getComments = async (req, res) => {
 
 exports.createComment = async (req, res) => {
     try {
-
         let content = req.body.content;
         let createdAt = req.body.createdAt;
         let username = req.body.username;
@@ -30,6 +29,29 @@ exports.createComment = async (req, res) => {
         }
     } catch (error) {
         console.log(`Error trying to create comment: ${error}`);
+        return res.status(400).send();
+    }
+}
+
+exports.editComment = async (req, res) => {
+    try {
+        let content = req.body.content;
+        let createdAt = req.body.createdAt;
+        let username = req.body.username;
+
+        const id = req.params.id;
+        const result = await db.query("UPDATE comments SET content = ?, createdAt = ?, username = ? WHERE id = ?",
+            [content, createdAt, username, id]);
+
+        if(result.affectedRows) {
+            return res.status(200).json({
+                content: content,
+                createdAt: createdAt,
+                username: username
+            })
+        }
+    } catch (error) {
+        console.log(`Error changing comments: ${error}`);
         return res.status(400).send();
     }
 }
