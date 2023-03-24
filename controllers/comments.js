@@ -13,14 +13,22 @@ exports.getComments = async (req, res) => {
 
 exports.createComment = async (req, res) => {
     try {
-        const {content, createdAt, username} = req.body;
+        const currentDate = new Date().toISOString();
+        let dateObject = new Date(currentDate);
+
+        let dateDay = dateObject.getDate();
+        let dateMonth = dateObject.getMonth() + 1;
+        let time = dateObject.getHours().toString().padStart(2,0) + ":" + dateObject.getMinutes().toString().padStart(2,0) + ":" + dateObject.getSeconds().toString().padStart(2,0);
+        const timeStamp = dateDay + "/" + dateMonth  + " " + time;
+
+        const {content, username} = req.body;
         const result = await db.query("INSERT INTO `comments`(`content`,`createdAt`, `username`) VALUES (?, ?, ?)",
-            [content, createdAt, username]);
+            [content, timeStamp, username]);
 
         if(result.affectedRows) {
             return res.status(201).json({
                 content: content,
-                createdAt: createdAt,
+                createdAt: timeStamp,
                 username: username
             })
         }
