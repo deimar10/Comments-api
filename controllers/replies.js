@@ -43,3 +43,15 @@ exports.createReply = async (req, res) => {
         return res.status(400).send();
     }
 }
+
+exports.deleteReply = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await db.query('DELETE FROM replies WHERE id = ?', [id]);
+
+        return res.status(204).send();
+    } catch(error) {
+        console.log(`Error deleting reply: ${error}`);
+        return res.status(400).send();
+    }
+}
