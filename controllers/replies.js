@@ -44,6 +44,25 @@ exports.createReply = async (req, res) => {
     }
 }
 
+exports.editReply = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { content } = req.body;
+
+        const result = await db.query("UPDATE replies SET content = ? WHERE id = ?", [content, id])
+
+        if(result.affectedRows) {
+            return res.status(200).json({
+                content: content
+            })
+        }
+
+    } catch(error) {
+        console.log(`Error changing replies: ${error} `);
+        return res.status(400).send();
+    }
+}
+
 exports.deleteReply = async (req, res) => {
     try {
         const id = req.params.id;
