@@ -1,5 +1,16 @@
 const db = require('../models/db');
 
+exports.getReplies = async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM replies");
+
+        return res.status(200).send(result);
+    } catch(error) {
+        console.log(`Error getting replies: ${error}`);
+        return res.status(400).send();
+    }
+}
+
 exports.createReply = async (req, res) => {
     try {
         const currentDate = new Date().toISOString();
@@ -29,5 +40,6 @@ exports.createReply = async (req, res) => {
         }
     } catch(error) {
         console.log(`Error creating reply: ${error}`);
+        return res.status(400).send();
     }
 }
