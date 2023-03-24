@@ -8,10 +8,11 @@ dotenv.config();
 
 app.use(cors());
 
-const router = require('./routes/comments');
+const commentsRouter = require('./routes/comments');
+const repliesRouter = require('./routes/replies');
 
 app.use(bodyParser.json());
-app.use("/comments", router);
+app.use("", commentsRouter, repliesRouter);
 
 const port = process.env.PORT || 3002;
 app.listen(3002, () => console.log(`Server started on port: ${port}`));
