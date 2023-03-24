@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const { getTimeStamp } = require('../Utils/timestamp');
 
 exports.getReplies = async (req, res) => {
     try {
@@ -13,16 +14,9 @@ exports.getReplies = async (req, res) => {
 
 exports.createReply = async (req, res) => {
     try {
-        const currentDate = new Date().toISOString();
-        let dateObject = new Date(currentDate);
-
-        let dateDay = dateObject.getDate();
-        let dateMonth = dateObject.getMonth() + 1;
-        let time = dateObject.getHours().toString().padStart(2,0) + ":" + dateObject.getMinutes().toString().padStart(2,0) + ":" + dateObject.getSeconds().toString().padStart(2,0);
-
-        const timeStamp = dateDay + "/" + dateMonth  + " " + time;
         const commentId = req.params.id;
         const {content, username} = req.body;
+        const timeStamp = getTimeStamp();
 
         const replyingTo = await db.query("SELECT username FROM comments WHERE id = ?", [commentId]);
 
@@ -48,12 +42,14 @@ exports.editReply = async (req, res) => {
     try {
         const id = req.params.id;
         const { content } = req.body;
+        const timeStamp = getTimeStamp();
 
-        const result = await db.query("UPDATE replies SET content = ? WHERE id = ?", [content, id])
+        const result = await db.query("UPDATE replies SET content = ?, createdAt = ? WHERE id = ?", [content, timeStamp, id])
 
         if(result.affectedRows) {
             return res.status(200).json({
-                content: content
+                content: content,
+                createdAt: timeStamp
             })
         }
 

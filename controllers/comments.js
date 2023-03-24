@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const { getTimeStamp } = require('../Utils/timestamp');
 
 exports.getComments = async (req, res) => {
     try {
@@ -13,15 +14,9 @@ exports.getComments = async (req, res) => {
 
 exports.createComment = async (req, res) => {
     try {
-        const currentDate = new Date().toISOString();
-        let dateObject = new Date(currentDate);
-
-        let dateDay = dateObject.getDate();
-        let dateMonth = dateObject.getMonth() + 1;
-        let time = dateObject.getHours().toString().padStart(2,0) + ":" + dateObject.getMinutes().toString().padStart(2,0) + ":" + dateObject.getSeconds().toString().padStart(2,0);
-        const timeStamp = dateDay + "/" + dateMonth  + " " + time;
-
         const {content, username} = req.body;
+        const timeStamp = getTimeStamp();
+
         const result = await db.query("INSERT INTO `comments`(`content`,`createdAt`, `username`) VALUES (?, ?, ?)",
             [content, timeStamp, username]);
 
@@ -40,16 +35,17 @@ exports.createComment = async (req, res) => {
 
 exports.editComment = async (req, res) => {
     try {
-        const {content, createdAt, username} = req.body;
+        const {content} = req.body;
         const id = req.params.id;
-        const result = await db.query("UPDATE comments SET content = ?, createdAt = ?, username = ? WHERE id = ?",
-            [content, createdAt, username, id]);
+        const timeStamp = getTimeStamp();
+
+        const result = await db.query("UPDATE comments SET content = ?, createdAt = ? WHERE id = ?",
+            [content, timeStamp, id]);
 
         if(result.affectedRows) {
             return res.status(200).json({
                 content: content,
-                createdAt: createdAt,
-                username: username
+                createdAt: timeStamp,
             })
         }
     } catch (error) {
