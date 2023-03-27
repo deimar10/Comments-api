@@ -54,6 +54,22 @@ exports.editComment = async (req, res) => {
     }
 }
 
+exports.editScore = async (req, res) => {
+    try {
+        const {score} = req.body;
+        const id = req.params.id;
+
+        await db.query("UPDATE comments SET score = ? WHERE id = ?",
+            [score, id]);
+
+        return res.status(200).send();
+
+    } catch (error) {
+        console.log(`Error changing score: ${error}`);
+        return res.status(400).send();
+    }
+}
+
 exports.deleteComment = async (req, res) => {
     try {
         const id = req.params.id;
