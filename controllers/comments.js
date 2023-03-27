@@ -1,5 +1,5 @@
 const db = require('../models/db');
-const { getTimeStamp } = require('../Utils/timestamp');
+const { getTimeStamp } = require('../utils/timestamp');
 
 exports.getComments = async (req, res) => {
     try {
