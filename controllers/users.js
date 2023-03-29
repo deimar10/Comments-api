@@ -28,3 +28,20 @@ exports.register = async (req, res) => {
         return res.status(400).send();
     }
 }
+
+exports.login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const registeredPassword = await db.query('SELECT password FROM users WHERE username = ?', [username]);
+
+        if (registeredPassword[0].password === password) {
+            return  res.status(201).json({auth: true});
+        } else {
+            return res.status(401).json({auth: false});
+        }
+
+    } catch(error) {
+        console.log(`Error authenticating user: ${error}`);
+        return res.status(400).send();
+    }
+}
