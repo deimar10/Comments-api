@@ -14,11 +14,14 @@ exports.getComments = async (req, res) => {
 
 exports.createComment = async (req, res) => {
     try {
-        const {content, username} = req.body;
+        const username = req.params.user;
+        const {content} = req.body;
         const timeStamp = getTimeStamp();
 
-        const result = await db.query("INSERT INTO `comments`(`content`,`createdAt`, `username`) VALUES (?, ?, ?)",
-            [content, timeStamp, username]);
+        const userId = await db.query("SELECT id FROM users WHERE username = ?", [username]);
+
+        const result = await db.query("INSERT INTO `comments`(`userId`, `content`,`createdAt`, `username`) VALUES (?, ?, ?, ?)",
+            [userId[0].id, content, timeStamp, username]);
 
         if(result.affectedRows) {
             return res.status(201).json({
