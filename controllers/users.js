@@ -1,16 +1,21 @@
 const db = require ('../models/db');
+const {response} = require("express");
 
 exports.register = async (req, res) => {
     try {
         const { username, password } = req.body;
         const isUserRegistered = await db.query('SELECT username FROM users WHERE username = ?', [username]);
 
-        if (!password || !username) {
-            throw new Error('Empty user input error');
+        if (!username) {
+            res.status(400).json({ error: 'Username cannot be empty or shorter than 6 letters'});
+            return;
         }
 
         if (isUserRegistered[0]) {
-            throw Error('Username already registered');
+            res.status(400).json({ error: 'Username already registered'});
+            return;
+        } else {
+            res.status(200).json({ message: 'User name available' });
         }
 
         const result = await db.query('INSERT INTO `users` (`username`, `password`) VALUES (?, ?)',
