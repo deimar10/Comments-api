@@ -15,7 +15,8 @@ exports.getReplies = async (req, res) => {
 exports.createReply = async (req, res) => {
     try {
         const commentId = req.params.id;
-        const {content, username} = req.body;
+        const username = req.params.username;
+        const {content} = req.body;
         const timeStamp = getTimeStamp();
 
         const replyingTo = await db.query("SELECT username FROM comments WHERE id = ?", [commentId]);
@@ -41,16 +42,23 @@ exports.createReply = async (req, res) => {
 exports.editReply = async (req, res) => {
     try {
         const id = req.params.id;
+        const username = req.params.username;
         const { content } = req.body;
         const timeStamp = getTimeStamp();
 
-        const result = await db.query("UPDATE replies SET content = ?, createdAt = ? WHERE id = ?", [content, timeStamp, id])
+        const authenticatedUser = await db.query("SELECT username FROM replies WHERE username = ?", [username]);
 
-        if(result.affectedRows) {
-            return res.status(200).json({
-                content: content,
-                createdAt: timeStamp
-            })
+        if(authenticatedUser) {
+            const result = await db.query("UPDATE replies SET content = ?, createdAt = ? WHERE id = ?", [content, timeStamp, id])
+
+            if(result.affectedRows) {
+                return res.status(200).json({
+                    content: content,
+                    createdAt: timeStamp
+                })
+            }
+        } else {
+            res.status(400).json({ message: 'Not authenticated' });
         }
 
     } catch(error) {
@@ -76,7 +84,15 @@ exports.editScore = async (req, res) => {
 exports.deleteReply = async (req, res) => {
     try {
         const id = req.params.id;
-        await db.query('DELETE FROM replies WHERE id = ?', [id]);
+        const username = req.params.username;
+
+        const authenticatedUser = await db.query("SELECT id FROM replies WHERE id = ? AND username = ?", [id, username]);
+
+        if(authenticatedUser[0]) {
+            await db.query('DELETE FROM replies WHERE id = ?', [id]);
+        } else {
+            res.status(400).json({ message: 'Not authenticated' });
+        }
 
         return res.status(204).send();
     } catch(error) {
