@@ -1,5 +1,4 @@
 const db = require ('../models/db');
-const {response} = require("express");
 
 exports.register = async (req, res) => {
     try {
