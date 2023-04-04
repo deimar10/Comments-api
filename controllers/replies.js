@@ -42,13 +42,9 @@ exports.createReply = async (req, res) => {
 exports.editReply = async (req, res) => {
     try {
         const id = req.params.id;
-        const username = req.params.username;
         const { content } = req.body;
         const timeStamp = getTimeStamp();
 
-        const authenticatedUser = await db.query("SELECT username FROM replies WHERE username = ?", [username]);
-
-        if(authenticatedUser) {
             const result = await db.query("UPDATE replies SET content = ?, createdAt = ? WHERE id = ?", [content, timeStamp, id])
 
             if(result.affectedRows) {
@@ -57,9 +53,9 @@ exports.editReply = async (req, res) => {
                     createdAt: timeStamp
                 })
             }
-        } else {
+
             res.status(400).json({ message: 'Not authenticated' });
-        }
+
 
     } catch(error) {
         console.log(`Error changing replies: ${error} `);
