@@ -26,10 +26,11 @@ exports.createReply = async (req, res) => {
 
         if (result.affectedRows) {
             return res.status(201).json({
-                replyingId: commentId,
-                replyingTo: replyingTo,
                 content: content,
                 createdAt: timeStamp,
+                score: 0,
+                replyingId: commentId,
+                replyingTo: replyingTo,
                 username: username,
             });
         }
