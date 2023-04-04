@@ -23,11 +23,15 @@ exports.createComment = async (req, res) => {
         const result = await db.query("INSERT INTO `comments`(`userId`, `content`,`createdAt`, `username`) VALUES (?, ?, ?, ?)",
             [userId[0].id, content, timeStamp, username]);
 
+        const id = result.insertId;
+
         if(result.affectedRows) {
             return res.status(201).json({
+                id: id,
                 content: content,
                 createdAt: timeStamp,
-                username: username
+                username: username,
+                score: 0
             })
         }
     } catch (error) {
@@ -48,7 +52,7 @@ exports.editComment = async (req, res) => {
         if(result.affectedRows) {
             return res.status(200).json({
                 content: content,
-                createdAt: timeStamp,
+                createdAt: timeStamp
             })
         }
     } catch (error) {
