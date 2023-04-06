@@ -42,17 +42,17 @@ exports.createComment = async (req, res) => {
 
 exports.editComment = async (req, res) => {
     try {
-        const {content} = req.body;
+        const {content, modified} = req.body;
         const id = req.params.id;
         const timeStamp = getTimeStamp();
-
-        const result = await db.query("UPDATE comments SET content = ?, createdAt = ? WHERE id = ?",
-            [content, timeStamp, id]);
+        const result = await db.query("UPDATE comments SET content = ?, createdAt = ?, modified= ? WHERE id = ?",
+            [content, timeStamp, modified, id]);
 
         if(result.affectedRows) {
             return res.status(200).json({
                 content: content,
-                createdAt: timeStamp
+                createdAt: timeStamp,
+                modified: modified,
             })
         }
     } catch (error) {
