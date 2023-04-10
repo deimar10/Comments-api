@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const CryptoJs = require('crypto-js');
 const { getTimeStamp } = require('../utils/timestamp');
 
 exports.getComments = async (req, res) => {
@@ -18,10 +19,13 @@ exports.createComment = async (req, res) => {
         const {content} = req.body;
         const timeStamp = getTimeStamp();
 
-        const userId = await db.query("SELECT id FROM users WHERE username = ?", [username]);
+        const bytes = CryptoJs.AES.decrypt(username, 'secret-key');
+        const decryptedUsername = bytes.toString(CryptoJs.enc.Utf8);
+
+        const userId = await db.query("SELECT id FROM users WHERE username = ?", [decryptedUsername]);
 
         const result = await db.query("INSERT INTO `comments`(`userId`, `content`,`createdAt`, `username`) VALUES (?, ?, ?, ?)",
-            [userId[0].id, content, timeStamp, username]);
+            [userId[0].id, content, timeStamp, decryptedUsername]);
 
         const id = result.insertId;
 
@@ -30,7 +34,7 @@ exports.createComment = async (req, res) => {
                 id: id,
                 content: content,
                 createdAt: timeStamp,
-                username: username,
+                username: decryptedUsername,
                 score: 0
             })
         }
