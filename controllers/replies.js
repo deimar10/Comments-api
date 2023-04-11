@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const CryptoJs = require('crypto-js');
 const { getTimeStamp } = require('../utils/timestamp');
 
 exports.getReplies = async (req, res) => {
@@ -19,10 +20,13 @@ exports.createReply = async (req, res) => {
         const {content} = req.body;
         const timeStamp = getTimeStamp();
 
+        const bytes = CryptoJs.AES.decrypt(username, 'secret-key');
+        const decryptedUsername = bytes.toString(CryptoJs.enc.Utf8);
+
         const replyingTo = await db.query("SELECT username FROM comments WHERE id = ?", [commentId]);
 
         const result = await db.query('INSERT INTO `replies` (`content`, `createdAt`, `username`, `replyingId`, replyingTo) VALUES(?, ?, ?, ?, ?)' ,
-            [content, timeStamp, username, commentId, replyingTo[0].username]);
+            [content, timeStamp, decryptedUsername, commentId, replyingTo[0].username]);
 
         if (result.affectedRows) {
             return res.status(201).json({
@@ -31,7 +35,7 @@ exports.createReply = async (req, res) => {
                 score: 0,
                 replyingId: commentId,
                 replyingTo: replyingTo,
-                username: username,
+                username: decryptedUsername,
             });
         }
     } catch(error) {
@@ -84,7 +88,10 @@ exports.deleteReply = async (req, res) => {
         const id = req.params.id;
         const username = req.params.username;
 
-        const authenticatedUser = await db.query("SELECT id FROM replies WHERE id = ? AND username = ?", [id, username]);
+        const bytes = CryptoJs.AES.decrypt(username, 'secret-key');
+        const decryptedUsername = bytes.toString(CryptoJs.enc.Utf8);
+
+        const authenticatedUser = await db.query("SELECT id FROM replies WHERE id = ? AND username = ?", [id, decryptedUsername]);
 
         if(authenticatedUser[0]) {
             await db.query('DELETE FROM replies WHERE id = ?', [id]);
