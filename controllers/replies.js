@@ -35,8 +35,6 @@ exports.createReply = async (req, res) => {
         const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`) VALUES (?, ?, ?)",
             [userId[0].id, message, replyingTo[0].username]);
 
-        res.status(201).send(notification);
-
         if (result.affectedRows) {
             return res.status(201).json({
                 content: content,
