@@ -79,7 +79,13 @@ exports.editScore = async (req, res) => {
         await db.query("UPDATE comments SET score = ? WHERE id = ?",
             [score, id]);
 
-        const message = `@${decryptedUsername} upvoted your comment.`
+        let message;
+        if(type === 'upvote') {
+             message = `@${decryptedUsername} upvoted your comment.`
+        } else {
+             message = `@${decryptedUsername} downvoted your comment.`
+        }
+
         const userId = await db.query("SELECT id from users WHERE username = ?", [decryptedUsername]);
 
         const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`, `type`) VALUES (?, ?, ?, ?)",
