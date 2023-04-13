@@ -67,11 +67,23 @@ exports.editComment = async (req, res) => {
 
 exports.editScore = async (req, res) => {
     try {
-        const {score} = req.body;
+        const {score, type} = req.body;
         const id = req.params.id;
+        const username = req.params.username;
+
+        const bytes = CryptoJs.AES.decrypt(username, 'secret-key');
+        const decryptedUsername = bytes.toString(CryptoJs.enc.Utf8);
+
+        const replyingTo = await db.query("SELECT username FROM comments WHERE id = ?", [id]);
 
         await db.query("UPDATE comments SET score = ? WHERE id = ?",
             [score, id]);
+
+        const message = `@${decryptedUsername} upvoted your comment.`
+        const userId = await db.query("SELECT id from users WHERE username = ?", [decryptedUsername]);
+
+        const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`, `type`) VALUES (?, ?, ?, ?)",
+            [userId[0].id, message, replyingTo[0].username, type]);
 
         return res.status(200).send();
 
