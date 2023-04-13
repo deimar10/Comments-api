@@ -17,7 +17,7 @@ exports.createReply = async (req, res) => {
     try {
         const commentId = req.params.id;
         const username = req.params.username;
-        const {content} = req.body;
+        const {content, type} = req.body;
         const timeStamp = getTimeStamp();
 
         const bytes = CryptoJs.AES.decrypt(username, 'secret-key');
@@ -32,8 +32,8 @@ exports.createReply = async (req, res) => {
         const message = `@${decryptedUsername} replied to your comment.`
         const userId = await db.query("SELECT id from users WHERE username = ?", [decryptedUsername]);
 
-        const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`) VALUES (?, ?, ?)",
-            [userId[0].id, message, replyingTo[0].username]);
+        const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`, `type`) VALUES (?, ?, ?, ?)",
+            [userId[0].id, message, replyingTo[0].username, type]);
 
         if (result.affectedRows) {
             return res.status(201).json({
