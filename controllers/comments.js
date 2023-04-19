@@ -67,7 +67,7 @@ exports.editComment = async (req, res) => {
 
 exports.editScore = async (req, res) => {
     try {
-        const {score, type} = req.body;
+        const {type} = req.body;
         const id = req.params.id;
         const username = req.params.username;
 
@@ -76,20 +76,25 @@ exports.editScore = async (req, res) => {
 
         const replyingTo = await db.query("SELECT username FROM comments WHERE id = ?", [id]);
 
-        await db.query("UPDATE comments SET score = ? WHERE id = ?",
-            [score, id]);
-
-        let message;
-        if(type === 'upvote') {
-             message = `@${decryptedUsername} upvoted your comment.`
-        } else {
-             message = `@${decryptedUsername} downvoted your comment.`
-        }
-
         const userId = await db.query("SELECT id from users WHERE username = ?", [decryptedUsername]);
+        const commentId = await db.query("SELECT id from comments WHERE id = ?", [id]);
 
-        const notification = await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`, `type`) VALUES (?, ?, ?, ?)",
-            [userId[0].id, message, replyingTo[0].username, type]);
+        const existingVote = await db.query("SELECT * FROM `comments_votes` WHERE `userId` = ? AND `commentId` = ?", [userId[0].id, commentId[0].id]);
+        if (existingVote.length > 0) {
+            if (existingVote[0].type === type) {
+                return res.status(400).send('User has already ' + type + 'voted');
+            } else {
+                const updateVote = await db.query("UPDATE comments_votes SET type = ? WHERE userId = ? AND commentId = ?", [type, userId[0].id, commentId[0].id]);
+                await db.query("UPDATE comments SET score = score + ? WHERE id = ?", [type === 'upvote' ? 1 : -1, id]);
+
+                const message = `@${decryptedUsername} ${type}d your comment.`;
+                await db.query("INSERT INTO `notifications`(`userId`, `content`, `username`, `type`) VALUES (?, ?, ?, ?)",
+                    [userId[0].id, message, replyingTo[0].username, type]);
+            }
+        } else {
+            const setScore = await db.query("INSERT INTO `comments_votes`(`userId`, `commentId`, `type`) VALUES (?, ?, ?)", [userId[0].id, commentId[0].id, type]);
+            await db.query("UPDATE comments SET score = score + ? WHERE id = ?", [type === 'upvote' ? 1 : -1, id]);
+        }
 
         return res.status(200).send();
 
